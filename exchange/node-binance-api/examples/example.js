@@ -1,11 +1,11 @@
-const binance = require('../node-binance-api.js');
-let Depth = require('../../../proxy').Depth
-let cache = require('../../../common/cache');
+const binance = require("../node-binance-api.js");
+let Depth = require("../../../proxy").Depth;
+let cache = require("../../../common/cache");
 var token = require("../../../token");
 
 binance.options({
-  'APIKEY':token.keys['binance'].apiKey,
-  'APISECRET':token.keys['binance'].secret
+  APIKEY: "", //token.keys["binance"].apiKey,
+  APISECRET: "" //token.keys["binance"].secret
 });
 
 // Get bid/ask prices
@@ -20,41 +20,40 @@ binance.options({
 // });
 
 //Getting list of current balances
-let coins = [  'EOS', 'ETH', 'BCC', 'BTC', 'BTG', 'USDT', 'BNB'] //, 'ETH/BTC'
+let coins = ["EOS", "ETH", "BCC", "BTC", "BTG", "USDT", "BNB"]; //, 'ETH/BTC'
 // { free: 2.88768343,
 //   used: 0.10515742999999977,
 //   total: 2.99284086 }
-binance.balance(function(error, balances) {
+/*binance.balance(function(error, balances) {
   console.log("balances()", balances);
-  let b = {}
+  let b = {};
   for (let index in coins) {
-    let item = {}
-    let coin = coins[index]
-    console.log(coins[index], balances[coin], typeof coin)
-    item.free = +balances[coin].available
-    item.used = +balances[coin].onOrder
-    item.total = item.free + item.used
-    if(coin == 'BCC'){
-      console.log('coin bcc', coin)
-      coin = 'BCH'
+    let item = {};
+    let coin = coins[index];
+    console.log(coins[index], balances[coin], typeof coin);
+    item.free = +balances[coin].available;
+    item.used = +balances[coin].onOrder;
+    item.total = item.free + item.used;
+    if (coin == "BCC") {
+      console.log("coin bcc", coin);
+      coin = "BCH";
     }
 
-    b[coin] = item
+    b[coin] = item;
   }
-  console.log('save b: ', b)
-  cache.set('balancebinance', b, function () {
+  console.log("save b: ", b);
+  cache.set("balancebinance", b, function() {
     //console.log('b.')
     // cache.get('bitfinexBCH/BTC', function (err, data) {
     //   console.log('data: ', data)
     // })
-  })
+  });
 
-	// if ( typeof balances.ETH !== "undefined" ) {
-	// 	console.log("ETH balance: ", balances.ETH.available);
-	// }
+  // if ( typeof balances.ETH !== "undefined" ) {
+  // 	console.log("ETH balance: ", balances.ETH.available);
+  // }
 });
-
-
+*/
 // cache.get('balancebinance', function (err, data) {
 //  console.log('data: ', data)
 // })
@@ -115,86 +114,97 @@ binance.balance(function(error, balances) {
 // });
 
 let symbols_map = {
-  'EOSBTC':'EOS/BTC',
-  'ETHBTC':'ETH/BTC',
-  'BCCBTC':'BCH/BTC',
-  'EOSETH':'EOS/ETH',
-  'BCCETH':'BCH/ETH',
-  'EOSUSDT':'EOS/USDT',
-  'ETHUSDT':'ETH/USDT',
-  'BCCUSDT':'BCH/USDT',
-  'BTCUSDT':'BTC/USDT',
-  'BNBBTC':'BNB/BTC',
-}
+  EOSBTC: "EOS/BTC",
+  ETHBTC: "ETH/BTC",
+  BCCBTC: "BCH/BTC",
+  EOSETH: "EOS/ETH",
+  BCCETH: "BCH/ETH",
+  EOSUSDT: "EOS/USDT",
+  ETHUSDT: "ETH/USDT",
+  BCCUSDT: "BCH/USDT",
+  BTCUSDT: "BTC/USDT",
+  BNBBTC: "BNB/BTC"
+};
 // Maintain Market Depth Cache Locally via WebSocket
 
 function isSameDepth(depth1, depth2) {
   try {
-    if (depth1 == null || depth2 == null)
-      return false
+    if (depth1 == null || depth2 == null) return false;
 
-    if (depth1['ask0'][0] != depth2['ask0'][0]
-        ||depth1['ask0'][1] != depth2['ask0'][1]
-        ||depth1['bid0'][0] != depth2['bid0'][0]
-        ||depth1['bid0'][1] != depth2['bid0'][1])
-      return false
+    if (
+      depth1["ask0"][0] != depth2["ask0"][0] ||
+      depth1["ask0"][1] != depth2["ask0"][1] ||
+      depth1["bid0"][0] != depth2["bid0"][0] ||
+      depth1["bid0"][1] != depth2["bid0"][1]
+    )
+      return false;
 
-    let time_diffrence = depth1.website_time - depth2.website_time
+    let time_diffrence = depth1.website_time - depth2.website_time;
     if (time_diffrence > 1000) {
-
-      console.log('should return for time_diffrence:', time_diffrence)
+      console.log("should return for time_diffrence:", time_diffrence);
       //return false
     }
-    return true
-
+    return true;
   } catch (e) {
-    console.log(e)
-    return false
+    console.log(e);
+    return false;
   }
-
 }
 
 let cache_sym_depth = {
-  'EOS/BTC': null,
-  'ETH/BTC': null,
-  'BCH/BTC': null,
-  'BCH/ETH': null,
-  'EOS/ETH': null,
-  'EOS/USDT': null,
-  'ETH/USDT': null,
-  'BCH/USDT': null,
-  'BTC/USDT': null,
-  'BNB/BTC': null,
-}
-binance.websockets.depthCache([/*"EOSBTC", "ETHBTC", "BCCBTC", */
-  "EOSETH", "BCCETH", "EOSUSDT", "ETHUSDT", "BCCUSDT", "BTCUSDT", "BNBBTC"], function(symbol, depth) {
-	let max = 10; // Show 10 closest orders only
-	let bids = binance.sortBids(depth.bids, max);
-	let asks = binance.sortAsks(depth.asks, max);
-	console.log(symbols_map[symbol]+" depth cache update");
-	//console.log("asks", asks);
-	//console.log("bids", bids);
-	console.log("ask: "+binance.first(asks), asks[binance.first(asks)]);
-	console.log("bid: "+binance.first(bids), bids[binance.first(bids)]);
-  let dep = {
-  website_time: new Date(),
-  exchange: 'binance',
-  symbol: symbols_map[symbol],
-  ask0: [+binance.first(asks), asks[binance.first(asks)]],
-  bid0: [+binance.first(bids), bids[binance.first(bids)]]
+  "EOS/BTC": null,
+  "ETH/BTC": null,
+  "BCH/BTC": null,
+  "BCH/ETH": null,
+  "EOS/ETH": null,
+  "EOS/USDT": null,
+  "ETH/USDT": null,
+  "BCH/USDT": null,
+  "BTC/USDT": null,
+  "BNB/BTC": null
+};
+binance.websockets.depthCache(
+  [
+    "EOSBTC",
+    "ETHBTC",
+    "BCCBTC"
+    /*"EOSETH",
+    "BCCETH",
+    "EOSUSDT",
+    "ETHUSDT",
+    "BCCUSDT",
+    "BTCUSDT",
+    "BNBBTC"*/
+  ],
+  function(symbol, depth) {
+    let max = 10; // Show 10 closest orders only
+    let bids = binance.sortBids(depth.bids, max);
+    let asks = binance.sortAsks(depth.asks, max);
+    console.log(symbols_map[symbol] + " depth cache update");
+    //console.log("asks", asks);
+    //console.log("bids", bids);
+    console.log("ask: " + binance.first(asks), asks[binance.first(asks)]);
+    console.log("bid: " + binance.first(bids), bids[binance.first(bids)]);
+    let dep = {
+      website_time: new Date(),
+      exchange: "binance",
+      symbol: symbols_map[symbol],
+      ask0: [+binance.first(asks), asks[binance.first(asks)]],
+      bid0: [+binance.first(bids), bids[binance.first(bids)]],
+      asks: asks,
+      bids: bids
+    };
+    if (!isSameDepth(cache_sym_depth[symbols_map[symbol]], dep)) {
+      //Depth.NewDepth(dep)
+      cache.set("binance" + symbols_map[symbol], dep, function() {
+        //console.log('b.')
+        // cache.get('bitfinexBCH/BTC', function (err, data) {
+        //   console.log('data: ', data)
+        // })
+      });
+      cache_sym_depth[symbols_map[symbol]] = dep;
+    } else {
+      console.log(symbols_map[symbol] + " same Depth error");
+    }
   }
-  if(!isSameDepth(cache_sym_depth[symbols_map[symbol]], dep)){
-    //Depth.NewDepth(dep)
-    cache.set('binance'+symbols_map[symbol], dep, function () {
-      //console.log('b.')
-      // cache.get('bitfinexBCH/BTC', function (err, data) {
-      //   console.log('data: ', data)
-      // })
-    })
-    cache_sym_depth[symbols_map[symbol]] = dep
-  }else{
-    console.log(symbols_map[symbol]+" same Depth error");
-  }
-
-
-});
+);
