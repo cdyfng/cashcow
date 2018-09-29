@@ -36,6 +36,7 @@ let statisticId = 189;
 let setting = {
   "ETH/BTC": {
     hungry_dog: 0,
+    smallThreshold: 1.0002,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/aheahe.wav",
@@ -48,6 +49,7 @@ let setting = {
   },
   "BCH/BTC": {
     hungry_dog: 0,
+    smallThreshold: 1.0002,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/dididi.wav",
@@ -60,6 +62,7 @@ let setting = {
   },
   "EOS/BTC": {
     hungry_dog: 0,
+    smallThreshold: 1.0002,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/snare.wav",
@@ -72,6 +75,7 @@ let setting = {
   },
   "BTG/BTC": {
     hungry_dog: 0,
+    smallThreshold: 1.0002,
     threshold: 1.03,
     bigThreshold: 1.00303025,
     current_price: 0,
@@ -85,6 +89,7 @@ let setting = {
   },
   "EOS/ETH": {
     hungry_dog: 0,
+    smallThreshold: 1.0002,
     threshold: 1.006,
     bigThreshold: 1.00303025,
     current_price: 0,
@@ -107,7 +112,7 @@ let feeRate = {
 };
 
 //let notinclude= ['okex']
-let all_ex = [/* 'hitbtc',*/ "binance", "huobipro", "okex", "bitfinex"];
+let all_ex = [/* 'hitbtc', "huobipro",*/ "binance", "okex", "bitfinex"];
 let delays = [600, /*1200,*/ 600, 1000];
 
 let symbols = ["EOS/BTC", "ETH/BTC", "BCH/BTC" /*'EOS/ETH',  'BTG/BTC'*/]; //, 'ETH/BTC'
@@ -187,6 +192,11 @@ async function getLastDepth(exchange, symbol, interval = 10000) {
 
 let processingCnt = 0;
 
+//add buffer to analyse the order list
+//size 100
+//push data when ask0 or bid0 change
+//save into a csv file when warnning triggers
+let orderlist_buffer;
 async function priceWarning() {
   let CONCURRENTCY_SIZE = 1;
   let i = 0;
@@ -238,12 +248,18 @@ async function priceWarning() {
         if (_.size(sorted_bids) >= 1 && _.size(sorted_asks) >= 1) {
           let myBid = sorted_bids[0];
           let myAsk = sorted_asks[0];
+          //include the fee (myBid myAsk)
           let maxProfitRate = myAsk.ask0[0] / myBid.bid0[0];
 
+          //not include the fee(dpeths)
           let profitRate =
             depths[myAsk.exchange].bid0[0] / depths[myBid.exchange].ask0[0] +
             feeRate[myAsk.exchange]["maker"] +
             feeRate[myBid.exchange]["maker"];
+          let profitRateTaker =
+            depths[myAsk.exchange].bid0[0] / depths[myBid.exchange].ask0[0] +
+            feeRate[myAsk.exchange]["taker"] +
+            feeRate[myBid.exchange]["taker"];
           ///myAsk.bid0[0] / myBid.ask0[0]
           //let amount = 0
           let exchangePair = [myAsk.exchange, myBid.exchange];
@@ -254,18 +270,30 @@ async function priceWarning() {
             depths[myBid.exchange].bid0[0]
           ];
 
+          let smallThreshold = setting[symbol].smallThreshold;
           let threshold = setting[symbol].threshold;
           let bigThreshold = setting[symbol].bigThreshold;
           let dog = setting[symbol].hungry_dog;
-          log(
-            "ask: ",
-            myAsk.ask0[0],
-            myAsk.bid0[0],
-            "bid:",
-            myBid.ask0[0],
-            myBid.bid0[0]
-          );
 
+          let log_price = util.format(
+            "%s s: %s: %f %f %f %f sprd:%f%% b: %s: %f %f %f %f sprd:%f%%",
+            myAsk.symbol,
+            myAsk.exchange,
+            myAsk.ask0[0].toFixed(5),
+            myAsk.ask0[1].toFixed(3),
+            myAsk.bid0[0].toFixed(5),
+            myAsk.bid0[1].toFixed(3),
+            (((myAsk.ask0[0] - myAsk.bid0[0]) / myAsk.ask0[0]) * 100).toFixed(
+              5
+            ),
+            myBid.exchange,
+            myBid.ask0[0].toFixed(5),
+            myBid.ask0[1].toFixed(3),
+            myBid.bid0[0].toFixed(5),
+            myBid.bid0[1].toFixed(3),
+            (((myBid.ask0[0] - myBid.bid0[0]) / myBid.ask0[0]) * 100).toFixed(5)
+          );
+          log(log_price);
           log(
             new Date(),
             symbol,
@@ -276,6 +304,8 @@ async function priceWarning() {
             "cnt",
             dog % 10,
             bigThreshold,
+            "profitRateTaker",
+            profitRateTaker,
             "profitRate:",
             profitRate,
             "maxProfitRate:",
@@ -285,11 +315,16 @@ async function priceWarning() {
             /*'last profit:', balances.profit.toFixed(5), */ "processingCnt:",
             processingCnt
           );
-          if (profitRate > threshold && maxProfitRate > bigThreshold) {
+          if (
+            profitRateTaker > smallThreshold &&
+            profitRate > threshold &&
+            maxProfitRate > bigThreshold
+          ) {
             setting[symbol].hungry_dog = 0;
             let item = {
               symbol: symbol,
               exchangePair: exchangePair,
+              smallThreshold: smallThreshold,
               profitRate: profitRate,
               maxProfitRate: maxProfitRate,
               //sell_available: balances[myAsk.exchange][s[0]].free * 0.99,
@@ -312,6 +347,7 @@ async function priceWarning() {
               new Date(),
               item.symbol,
               item.exchangePair,
+              item.smallThreshold.toFixed(5),
               item.profitRate.toFixed(5),
               /*item.amount,
                 item.sell_available.toFixed(3), item.buy_available.toFixed(3),*/ item.sell_price,
@@ -327,6 +363,7 @@ async function priceWarning() {
                 (+balances.summary.others.totalCapital).toFixed(5),
                 (+balances.summary.others.pRate).toFixed(5)*/
             );
+            log.bright.red(log_price, " last profit2:");
 
             //setting[symbol].processing = true
 
@@ -340,11 +377,12 @@ async function priceWarning() {
                 item.profitRate
               );
               let content = util.format(
-                "%s, %s %s, %j",
+                "%s, %s %s, \n%j, \n%s",
                 symbol,
                 exchangePair[0],
                 exchangePair[1],
-                item
+                item,
+                log_price
               );
 
               mail.sendMyMail(mail_to, subject, content);
