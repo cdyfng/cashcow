@@ -36,7 +36,7 @@ let statisticId = 189;
 let setting = {
   "ETH/BTC": {
     hungry_dog: 0,
-    smallThreshold: 1.0002,
+    smallThreshold: 1.000,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/aheahe.wav",
@@ -49,7 +49,7 @@ let setting = {
   },
   "BCH/BTC": {
     hungry_dog: 0,
-    smallThreshold: 1.0002,
+    smallThreshold: 1.000,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/dididi.wav",
@@ -62,7 +62,7 @@ let setting = {
   },
   "EOS/BTC": {
     hungry_dog: 0,
-    smallThreshold: 1.0002,
+    smallThreshold: 1.000,
     threshold: 1.00051,
     bigThreshold: 1.00152,
     reminder_wav_path: "./music/snare.wav",
@@ -324,7 +324,7 @@ async function priceWarning() {
             let item = {
               symbol: symbol,
               exchangePair: exchangePair,
-              smallThreshold: smallThreshold,
+              profitRateTaker: profitRateTaker,
               profitRate: profitRate,
               maxProfitRate: maxProfitRate,
               //sell_available: balances[myAsk.exchange][s[0]].free * 0.99,
@@ -347,7 +347,7 @@ async function priceWarning() {
               new Date(),
               item.symbol,
               item.exchangePair,
-              item.smallThreshold.toFixed(5),
+              item.profitRateTaker.toFixed(5),
               item.profitRate.toFixed(5),
               /*item.amount,
                 item.sell_available.toFixed(3), item.buy_available.toFixed(3),*/ item.sell_price,
@@ -371,9 +371,9 @@ async function priceWarning() {
               setting[symbol].first_warn = true;
               let subject = util.format(
                 "%s, %s %s, %f",
-                symbol,
                 exchangePair[0],
                 exchangePair[1],
+                symbol,
                 item.profitRate
               );
               let content = util.format(
