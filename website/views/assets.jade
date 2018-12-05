@@ -1,0 +1,89 @@
+extends layout
+
+block content
+  //h1= title
+  //p Welcome to #{title}
+  p #{date}
+  p The total transtions: #{num}
+  p The total profit: #{asset.profit.toFixed(5)} #{asset.summary.others.totalProfitWithFee.toFixed(5)} #{asset.summary.others.totalCapital.toFixed(5)} #{asset.summary.others.pRate.toFixed(5)}
+
+  table(class='table table-bordered table-hover')
+    thead
+      tr
+          td exchange
+          td BTC
+          td ETH
+          td BCH
+          td EOS
+          td VALUE
+    tbody
+      each ex in ['bitfinex','hitbtc', 'binance', 'huobipro']
+          tr
+              td #{ex}
+              td #{asset.detail[ex].BTC.free.toFixed(5)}
+              td #{asset.detail[ex].ETH.free.toFixed(5)}
+              td #{asset.detail[ex].BCH.free.toFixed(5)}
+              td #{asset.detail[ex].EOS.free.toFixed(5)}
+              td #{(asset.detail[ex].BTC.free + asset.detail[ex].ETH.free * asset.price.eth + asset.detail[ex].BCH.free * asset.price.bch + asset.detail[ex].EOS.free * asset.price.eos).toFixed(5)}
+      tr
+        td delta
+        td #{asset.delta.btc.toFixed(5)}
+        td #{asset.delta.eth.toFixed(5)}
+        td #{asset.delta.bch.toFixed(5)}
+        td #{asset.delta.eos.toFixed(5)}
+        td 0
+      tr
+        td ExTotal
+        td #{asset.exchange_total.t_b.toFixed(5)}
+        td #{asset.exchange_total.t_e.toFixed(5)}
+        td #{asset.exchange_total.t_bc.toFixed(5)}
+        td #{asset.exchange_total.t_eos.toFixed(5)}
+        td #{(asset.exchange_total.t_b + asset.exchange_total.t_e * asset.price.eth + asset.exchange_total.t_bc * asset.price.bch + asset.exchange_total.t_eos * asset.price.eos).toFixed(5)}
+
+      tr
+        td total
+        td #{asset.total.t_b.toFixed(5)}
+        td #{asset.total.t_e.toFixed(5)}
+        td #{asset.total.t_bc.toFixed(5)}
+        td #{asset.total.t_eos.toFixed(5)}
+        td #{(asset.total.t_b + asset.total.t_e * asset.price.eth + asset.total.t_bc * asset.price.bch + asset.total.t_eos * asset.price.eos).toFixed(5)}
+      tr
+        td price
+        td 1
+        td #{asset.price.eth.toFixed(5)}
+        td #{asset.price.bch.toFixed(5)}
+        td #{asset.price.eos.toFixed(8)}
+        td 0
+
+
+  p summary of each @ statistic:  #{asset.summary['EOS/BTC'].statisticId}
+  table(class='table table-bordered table-hover')
+    thead
+      tr
+       td symbol
+       td Total
+       td Counts
+       td Sells
+       td SellCost
+       td Countb
+       td Buys
+       td BuyCost
+       td profitRate
+       td profit
+       td profitRateWFee
+       td profitWFee
+    tbody
+      each symbolPair in ['EOS/BTC','BCH/BTC', 'ETH/BTC']
+        tr
+          td #{symbolPair}
+          td #{asset.summary[symbolPair].processOrders}
+          td #{asset.summary[symbolPair].sellOrders}
+          td #{asset.summary[symbolPair].sellTotal.toFixed(5)}
+          td #{asset.summary[symbolPair].sellCost.toFixed(5)}
+          td #{asset.summary[symbolPair].buyOrders}
+          td #{asset.summary[symbolPair].buyTotal.toFixed(5)}
+          td #{asset.summary[symbolPair].buyCost.toFixed(5)}
+          td #{asset.summary[symbolPair].profitRate}
+          td #{asset.summary[symbolPair].profit}
+          td #{asset.summary[symbolPair].profitRateWFee}
+          td #{asset.summary[symbolPair].profitWFee}
