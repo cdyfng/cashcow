@@ -2,8 +2,8 @@
  * Created by cdyfng on 27/09/17.
  */
 
-var token = require("./token");
-var play = require("play");
+//var token = require("./token");
+//var play = require("play");
 var logger = require("./common/logger");
 var util = require("util");
 const assert = require("assert");
@@ -13,7 +13,7 @@ var config = require("./config");
 
 var _ = require("lodash");
 var async = require("async");
-var ccxt = require("./ccxt/ccxt");
+//var ccxt = require("./ccxt/ccxt");
 var itertools = require("itertools");
 var os = require("os");
 var Order = require("./proxy").Order;
@@ -191,7 +191,7 @@ let getRate = async function(exchange, symbol) {
       return null;
     }
   } catch (e) {
-    if (e instanceof ccxt.DDoSProtection) {
+    /*if (e instanceof ccxt.DDoSProtection) {
       log.bright.yellow(exchange.id, "[DDoS Protection]");
     } else if (e instanceof ccxt.RequestTimeout) {
       log.bright.yellow(exchange.id, "[Request Timeout]");
@@ -205,7 +205,7 @@ let getRate = async function(exchange, symbol) {
       log.bright.yellow(exchange.id, "[Network Error]");
     } else {
       throw e;
-    }
+    }*/
     await sleep(10000);
     // throw e
   }
@@ -450,7 +450,7 @@ async function priceWarning() {
               mail.sendMyMail(mail_to, subject, content);
               if (os.platform() == "darwin") {
                 let wav = setting[symbol].reminder_wav_path;
-                play.sound(wav);
+                //play.sound(wav);
               }
             }
           } else {
@@ -574,7 +574,7 @@ async function priceWarning() {
         console.log(symbol, "has trade waiting for finish..");
       }
     } catch (e) {
-      if (e instanceof ccxt.DDoSProtection) {
+      /*if (e instanceof ccxt.DDoSProtection) {
         log.bright.yellow(exchange.id, "[DDoS Protection]");
       } else if (e instanceof ccxt.RequestTimeout) {
         log.bright.yellow(exchange.id, "[Request Timeout]");
@@ -590,7 +590,7 @@ async function priceWarning() {
         log.bright.red(e);
         await sleep(1000);
         process.exit(1);
-      }
+      }*/
     }
 
     if (processingCnt == 0) {
