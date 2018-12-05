@@ -1,0 +1,49 @@
+{
+  "name": "cashcow",
+  "version": "1.0.0",
+  "description": "crytocurrency trade alarm system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdyfng/cashcow.git"
+  },
+  "keywords": [
+    "btc",
+    "ether",
+    "crytocurrency",
+    "alarm"
+  ],
+  "author": "cdyfng",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cdyfng/cashcow/issues"
+  },
+  "homepage": "https://github.com/cdyfng/cashcow#readme",
+  "dependencies": {
+    "ansicolor": "^1.1.68",
+    "async": "^1.5.2",
+    "bcryptjs": "^2.3.0",
+    "bitfinex-api-node": "^1.0.2",
+    "csv-writer": "^1.2.0",
+    "deepcopy": "^0.6.3",
+    "eventproxy": "^1.0.0",
+    "ioredis": "^3.2.2",
+    "itertools": "0.0.3-pre",
+    "lodash": "^4.17.11",
+    "log4js": "^0.6.29",
+    "mongoose": "^4.4.9",
+    "node-schedule": "^1.2.3",
+    "nodemailer": "^2.3.0",
+    "nodemailer-smtp-transport": "^2.4.0",
+    "nonce": "^1.0.4",
+    "ololog": "^1.0.62",
+    "play": "^0.5.0",
+    "request": "^2.88.0",
+    "sleep": "^5.1.1",
+    "web3": "^0.15.3",
+    "winston": "^2.3.1"
+  }
+}
