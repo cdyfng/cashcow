@@ -4,8 +4,8 @@ let cache = require("../../../common/cache");
 var token = require("../../../token");
 
 binance.options({
-  APIKEY: "", //token.keys["binance"].apiKey,
-  APISECRET: "" //token.keys["binance"].secret
+  APIKEY: '',//token.keys["binance"].apiKey,
+  APISECRET: '',//token.keys["binance"].secret
 });
 
 // Get bid/ask prices
@@ -116,12 +116,11 @@ let coins = ["EOS", "ETH", "BCC", "BTC", "BTG", "USDT", "BNB"]; //, 'ETH/BTC'
 let symbols_map = {
   EOSBTC: "EOS/BTC",
   ETHBTC: "ETH/BTC",
-  BCCBTC: "BCH/BTC",
+  BCHABCBTC: "BCH/BTC",
+  BCHSVBTC: "BSV/BTC",
   EOSETH: "EOS/ETH",
-  BCCETH: "BCH/ETH",
   EOSUSDT: "EOS/USDT",
   ETHUSDT: "ETH/USDT",
-  BCCUSDT: "BCH/USDT",
   BTCUSDT: "BTC/USDT",
   BNBBTC: "BNB/BTC"
 };
@@ -155,19 +154,16 @@ let cache_sym_depth = {
   "EOS/BTC": null,
   "ETH/BTC": null,
   "BCH/BTC": null,
-  "BCH/ETH": null,
+  "BSV/BTC": null,
   "EOS/ETH": null,
   "EOS/USDT": null,
   "ETH/USDT": null,
-  "BCH/USDT": null,
   "BTC/USDT": null,
   "BNB/BTC": null
 };
 binance.websockets.depthCache(
   [
-    "EOSBTC",
-    "ETHBTC",
-    "BCCBTC"
+    "EOSBTC", "ETHBTC", "BCHABCBTC", "BCHSVBTC", 
     /*"EOSETH",
     "BCCETH",
     "EOSUSDT",
