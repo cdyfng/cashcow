@@ -102,7 +102,7 @@ let process_ob = function(symbol, ob){
         website_time: new Date(),
         exchange: 'bitfinex',
         symbol: symbol,
-        ask0: [+ob.asks[0][0], Math.abs(ob.asks[0][0])],
+        ask0: [+ob.asks[0][0], Math.abs(ob.asks[0][2])],
         bid0: [+ob.bids[0][0], ob.bids[0][2]],
       }
       if (!isSameDepth(depth, old_depths[symbol])) {
