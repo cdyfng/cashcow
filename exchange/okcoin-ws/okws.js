@@ -4,27 +4,37 @@ const WebSocket = require("ws");
 let cache = require("../../common/cache");
 
 // url
-const ws = new WebSocket("wss://real.okex.com:10441/websocket?compress=true");
 
-ws.on("open", function open() {
-  // ws.send('{"channel":"ok_sub_futureusd_btc_depth_quarter","event":"addChannel"}')
-  ws.send('{"channel":"ok_sub_spot_eth_btc_depth_5","event":"addChannel"}');
-  ws.send('{"channel":"ok_sub_spot_eos_btc_depth_5","event":"addChannel"}');
-  ws.send('{"channel":"ok_sub_spot_bch_btc_depth_5","event":"addChannel"}');
-  ws.send('{"channel":"ok_sub_spot_bsv_btc_depth_5","event":"addChannel"}');
-});
+let sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-ws.on("message", function incoming(data) {
-  if (data instanceof String) {
-    console.log("1", data);
-  } else {
-    try {
-      check_depth(JSON.parse(pako.inflateRaw(data, { to: "string" })));
-    } catch (err) {
-      console.log(err);
+
+function start_ws() {
+  const ws = new WebSocket("wss://real.okex.com:10441/websocket?compress=true");
+  ws.on("open", function open() {
+    // ws.send('{"channel":"ok_sub_futureusd_btc_depth_quarter","event":"addChannel"}')
+    ws.send('{"channel":"ok_sub_spot_eth_btc_depth_5","event":"addChannel"}');
+    ws.send('{"channel":"ok_sub_spot_eos_btc_depth_5","event":"addChannel"}');
+    ws.send('{"channel":"ok_sub_spot_bch_btc_depth_5","event":"addChannel"}');
+    ws.send('{"channel":"ok_sub_spot_bsv_btc_depth_5","event":"addChannel"}');
+  });
+
+  ws.on("message", function incoming(data) {
+    if (data instanceof String) {
+      console.log("1", data);
+    } else {
+      try {
+        check_depth(JSON.parse(pako.inflateRaw(data, { to: "string" })));
+      } catch (err) {
+        console.log(err);
+      }
     }
-  }
-});
+  });
+
+  return ws
+}
+
+
+
 
 let channel_symbol = new Map([
   ["ok_sub_spot_eth_btc_depth_5", "ETH/BTC"],
@@ -97,3 +107,20 @@ async function check_depth(d) {
     console.log(e);
   }
 }
+
+
+async function main(){
+  let loop = 1
+  while(true){
+    console.log('start...', loop)
+    let ws = start_ws()
+    await sleep(5 * 60 * 1000)
+    ws.close()
+    console.log('close...', loop++)
+    await sleep(5 * 1000)
+
+  }
+
+}
+
+main()
