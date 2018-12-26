@@ -106,6 +106,19 @@ let setting = {
     AUTO_ADJUST_GATE: 0.51, // 2, // 1,
     AUTO_ADJUST_SKIP: 6
   },
+  "BSV/BTC": {
+    hungry_dog: 0,
+    smallThreshold: 1.0,
+    threshold: 1.00051,
+    bigThreshold: 1.00152,
+    reminder_wav_path: "./music/dididi.wav",
+    first_warn: false,
+    processing: false,
+    max_support_coin: 0.5, // 5,
+    min_support_coin: 0.3, // 0.4, // 04, // 4,
+    AUTO_ADJUST_GATE: 0.51, // 2, // 1,
+    AUTO_ADJUST_SKIP: 6
+  },
   "EOS/BTC": {
     hungry_dog: 0,
     smallThreshold: 1.0,
@@ -158,10 +171,10 @@ let feeRate = {
 };
 
 //let notinclude = ['okex']
-let all_ex = [/* 'hitbtc', "huobipro", */ "okex", "binance", "bitfinex"];
+let all_ex = [/* 'hitbtc', "huobipro",*/  "okex", "binance", "bitfinex"];
 let delays = [600, 600, 1000];
 
-let symbols = ["EOS/BTC", "ETH/BTC", "BCH/BTC" /*'EOS/ETH',  'BTG/BTC'*/];
+let symbols = ["EOS/BTC", "ETH/BTC", "BCH/BTC", "BSV/BTC" /*'EOS/ETH',  'BTG/BTC'*/];
 //, 'ETH/BTC'
 let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
